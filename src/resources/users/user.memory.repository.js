@@ -1,25 +1,33 @@
-const { dataBaseService } = require('../../services');
+let USERS = [];
 
 const getAll = async () =>
   // TODO: mock implementation. should be replaced during task development
-  dataBaseService.getResource('users');
+  USERS;
 
 const getUserById = async (id) => {
-  const doesResourceExist = dataBaseService.checkIfResourceExist(
-    `${__dirname}/../../local-data-base/users/${id}.json`
-  );
-  if (!doesResourceExist) {
-    return null;
-  }
-  return dataBaseService.getSpecifiedResource(
-    `${__dirname}/../../local-data-base/users/${id}.json`
-  );
+  const user = USERS.find((item) => item.id === id);
+  return user;
 };
 
-const createUser = async (user) => dataBaseService.createEntity('users', user.id, user);
+const createUser = async (user) => {
+  USERS.push(user);
+  return user;
+};
 
-const updateUser = async (userId, user) => dataBaseService.updateEntity('users', userId, user);
+const updateUser = async (userId, user) => {
+  const newUsers = USERS.map((item) => {
+    if (item.id === userId) {
+      return user;
+    }
+    return item;
+  });
+  USERS = newUsers;
+  return user;
+};
 
-const deleteUser = async (id) => dataBaseService.deleteEntity('users', id);
+const deleteUser = async (id) => {
+  USERS = USERS.filter((item) => item.id !== id);
+  return id;
+};
 
 module.exports = { getAll, getUserById, createUser, deleteUser, updateUser };

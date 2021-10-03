@@ -1,34 +1,33 @@
-const { dataBaseService } = require('../../services');
+let TASKS = [];
 
 const getAll = async (id, parameterToSearch = 'boardId') => {
-  const task = dataBaseService.getResource('tasks', {
-    parameterToSearch,
-    parameterValue: id,
-  });
-  return task;
+  const tasks = TASKS.filter((item) => item[parameterToSearch] === id);
+  return tasks;
 };
 
 const getTaskById = async (id) => {
-  const doesResourceExist = dataBaseService.checkIfResourceExist(
-    `${__dirname}/../../local-data-base/tasks/${id}.json`
-  );
-  if (!doesResourceExist) {
-    return null;
-  }
-  const task = dataBaseService.getSpecifiedResource(
-    `${__dirname}/../../local-data-base/tasks/${id}.json`
-  );
+  const task = TASKS.find((item) => item.id === id);
   return task;
 };
 
-const createTask = async (task) =>
-  dataBaseService.createEntity('tasks', task.id, task);
-
-const deleteTask = async (taskId) => {
-  dataBaseService.deleteEntity('tasks', taskId);
+const createTask = async (task) => {
+  TASKS.push(task);
+  return task;
 };
 
-const updateTask = async (taskId, task) =>
-  dataBaseService.updateEntity('tasks', taskId, task);
+const deleteTask = async (taskId) => {
+  TASKS = TASKS.filter((item) => item.id !== taskId);
+  return taskId;
+};
+
+const updateTask = async (taskId, task) => {
+  TASKS = TASKS.map((item) => {
+    if (item.id === taskId) {
+      return task;
+    }
+    return item;
+  });
+  return task;
+};
 
 module.exports = { getAll, getTaskById, createTask, deleteTask, updateTask };

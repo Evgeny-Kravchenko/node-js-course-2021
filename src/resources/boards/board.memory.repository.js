@@ -1,30 +1,34 @@
-const { dataBaseService } = require('../../services');
+let BOARDS = [];
 
-const getAll = async () =>
-  // TODO: mock implementation. should be replaced during task development
-  dataBaseService.getResource('boards');
+const getAll = async () => BOARDS;
 
 const getById = async (id) => {
-  const doesResourceExist = dataBaseService.checkIfResourceExist(
-    `${__dirname}/../../local-data-base/boards/${id}.json`
-  );
-  if (!doesResourceExist) {
-    return null;
-  }
-  return dataBaseService.getSpecifiedResource(
-    `${__dirname}/../../local-data-base/boards/${id}.json`
-  );
+  const board = BOARDS.find((item) => item.id === id);
+  return board;
 };
 
-const checkIfBoardExist = async (boardId) => dataBaseService.checkIfResourceExist(
-    `${__dirname}/../../local-data-base/boards/${boardId}.json`
-  );
+const checkIfBoardExist = async (boardId) =>
+  BOARDS.some((item) => item.id === boardId);
 
-const createBoard = async (board) => dataBaseService.createEntity('boards', board.id, board);
+const createBoard = async (board) => {
+  BOARDS.push(board);
+  return board;
+};
 
-const updateBoard = async (boardId, board) => dataBaseService.updateEntity('boards', boardId, board);
+const updateBoard = async (boardId, board) => {
+  BOARDS = BOARDS.map((item) => {
+    if (item.id === boardId) {
+      return board;
+    }
+    return item;
+  });
+  return board;
+};
 
-const deleteBoard = async (id) => dataBaseService.deleteEntity('boards', id);
+const deleteBoard = async (id) => {
+  BOARDS = BOARDS.filter((item) => item.id !== id);
+  return id;
+};
 
 module.exports = {
   getAll,
