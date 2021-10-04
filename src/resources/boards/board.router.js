@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const { StatusCodes, getReasonPhrase } = require('http-status-codes');
 const Board = require('./board.model');
 const boardsService = require('./boards.service');
 const taskRouter = require('../tasks/task.router');
@@ -13,29 +14,34 @@ router.route('/:boardId').get(async (req, res) => {
   const {
     params: { boardId },
   } = req;
-  const board = await boardsService.getById(boardId);
-  if (board) {
-    res.status(200);
-    res.json(board);
+  if (boardId) {
+    const board = await boardsService.getById(boardId);
+    if (board) {
+      res.status(StatusCodes.OK);
+      res.json(board);
+    } else {
+      res.status(StatusCodes.NOT_FOUND);
+      res.json({ message: getReasonPhrase(StatusCodes.NOT_FOUND) });
+    }
   } else {
-    res.status(404);
-    res.json({ message: 'Board not found' });
+    res.status(StatusCodes.BAD_REQUEST);
+    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
   }
 });
 
 router.route('/').post(async (req, res) => {
   const { body } = req;
   if (!body.title || !body.columns) {
-    res.status(400);
-    res.json({ message: 'Bad request' });
+    res.status(StatusCodes.BAD_REQUEST);
+    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
   }
   try {
     const board = await boardsService.createBoard(body);
-    res.status(201);
+    res.status(StatusCodes.CREATED);
     res.json(board);
   } catch (err) {
-    res.status(500);
-    res.json({ message: 'Something went wrong' });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+    res.json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
   }
 });
 
@@ -44,13 +50,18 @@ router.route('/:boardId').put(async (req, res) => {
     params: { boardId },
     body,
   } = req;
-  try {
-    await boardsService.updateBoard(boardId, body);
-    res.status(200);
-    res.json({ message: 'Board is updated successfully' });
-  } catch (err) {
-    res.status(500);
-    res.json({ message: 'Something went wrong' });
+  if (boardId) {
+    try {
+      await boardsService.updateBoard(boardId, body);
+      res.status(StatusCodes.OK);
+      res.json({ message: getReasonPhrase(StatusCodes.OK) });
+    } catch (err) {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
+      res.json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
+    }
+  } else {
+    res.status(StatusCodes.BAD_REQUEST);
+    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
   }
 });
 
@@ -58,9 +69,14 @@ router.route('/:boardId').delete(async (req, res) => {
   const {
     params: { boardId },
   } = req;
-  await boardsService.deleteBoard(boardId);
-  res.status(204);
-  res.json({ boardId });
+  if (boardId) {
+    await boardsService.deleteBoard(boardId);
+    res.status(StatusCodes.NO_CONTENT);
+    res.json({ boardId });
+  } else {
+    res.status(StatusCodes.BAD_REQUEST);
+    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
+  }
 });
 
 router.use('/:boardId/tasks', taskRouter);

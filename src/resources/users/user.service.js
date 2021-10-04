@@ -6,19 +6,19 @@ const getAll = () => usersRepo.getAll();
 
 const getUserById = async (id) => {
   const user = id ? await usersRepo.getUserById(id) : null;
-  return User.toResponse(user);
+  return user;
 };
 
 const createUser = ({ name, login, password }) => {
   const user = new User({ name, login, password });
   usersRepo.createUser(user);
-  return User.toResponse(user);
+  return user;
 };
 
 const updateUser = (userId, body) => {
   const newUser = { ...body, id: userId };
   usersRepo.updateUser(userId, newUser);
-  return User.toResponse(newUser);
+  return newUser;
 };
 
 const deleteUser = (id) => {
