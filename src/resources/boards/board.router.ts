@@ -1,8 +1,10 @@
-const router = require('express').Router();
-const { StatusCodes, getReasonPhrase } = require('http-status-codes');
-const Board = require('./board.model');
-const boardsService = require('./boards.service');
-const taskRouter = require('../tasks/task.router');
+import { Router } from 'express';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+import { Board } from './board.model';
+import * as boardsService from './boards.service';
+import taskRouter from '../tasks/task.router';
+
+const router = Router();
 
 router.route('/').get(async (req, res) => {
   const boards = await boardsService.getAll();
@@ -81,4 +83,4 @@ router.route('/:boardId').delete(async (req, res) => {
 
 router.use('/:boardId/tasks', taskRouter);
 
-module.exports = router;
+export default router;

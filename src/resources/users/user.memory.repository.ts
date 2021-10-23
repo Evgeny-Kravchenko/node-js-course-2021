@@ -1,4 +1,6 @@
-let USERS = [];
+import { IUser } from './user.model';
+
+let USERS: IUser[] = [];
 
 /**
  * @namespace UserRepository
@@ -25,7 +27,7 @@ let USERS = [];
  * @memberof UserRepository
  * @returns {User[]} Array of users
  */
-const getAll = async () => USERS;
+const getAll = async (): Promise<IUser[]> => USERS;
 
 /**
  * This function returns a user by id
@@ -34,7 +36,7 @@ const getAll = async () => USERS;
  * @returns {User}
  */
 
-const getUserById = async (id) => {
+const getUserById = async (id: string): Promise<IUser | undefined> => {
   const user = USERS.find((item) => item.id === id);
   return user;
 };
@@ -45,7 +47,7 @@ const getUserById = async (id) => {
  * @param {CreateUserBody} user
  * @returns {CreateUserBody} User body
  */
-const createUser = async (user) => {
+const createUser = async (user: IUser): Promise<IUser> => {
   USERS.push(user);
   return user;
 };
@@ -57,7 +59,7 @@ const createUser = async (user) => {
  * @param {CreateUserBody} user Data to update a user
  * @returns {CreateUserBody}
  */
-const updateUser = async (userId, user) => {
+const updateUser = async (userId: string, user: IUser): Promise<IUser> => {
   const newUsers = USERS.map((item) => {
     if (item.id === userId) {
       return user;
@@ -74,9 +76,9 @@ const updateUser = async (userId, user) => {
  * @param {string} id The id of a user
  * @returns {string} The id of a user
  */
-const deleteUser = async (id) => {
+const deleteUser = async (id: string): Promise<string> => {
   USERS = USERS.filter((item) => item.id !== id);
   return id;
 };
 
-module.exports = { getAll, getUserById, createUser, deleteUser, updateUser };
+export { getAll, getUserById, createUser, deleteUser, updateUser };

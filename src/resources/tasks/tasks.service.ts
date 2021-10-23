@@ -1,14 +1,18 @@
-const tasksRepo = require('./task.memory.repository');
-const Task = require('./task.model');
+import * as tasksRepo from './task.memory.repository';
+import { Task, ITask } from './task.model';
 
-const getAll = async (boardId) => tasksRepo.getAll(boardId);
+const getAll = async (boardId: string): Promise<ITask[]> =>
+  tasksRepo.getAll(boardId);
 
-const getTaskById = async (boardId, taskId) => {
+const getTaskById = async (
+  boardId: string,
+  taskId: string
+): Promise<ITask | undefined> => {
   const task = await tasksRepo.getTaskById(taskId);
   return task;
 };
 
-const createTask = async (body) => {
+const createTask = async (body: Omit<ITask, 'id'>): Promise<ITask> => {
   const { title, order, description, userId, boardId, columnId } = body;
   const task = new Task({
     title,
@@ -24,7 +28,10 @@ const createTask = async (body) => {
   return Task.toResponse(task);
 };
 
-const deleteTasks = async (boardId, taskIds) => {
+const deleteTasks = async (
+  boardId: string,
+  taskIds: string[]
+): Promise<void> => {
   taskIds.forEach(async (taskId) => {
     const task = await getTaskById(boardId, taskId);
     if (task && task.boardId === boardId) {
@@ -33,27 +40,31 @@ const deleteTasks = async (boardId, taskIds) => {
   });
 };
 
-const deleteTasksByBoardId = async (boardId) => {
+const deleteTasksByBoardId = async (boardId: string): Promise<void> => {
   const tasks = await tasksRepo.getAll(boardId);
   tasks.forEach((task) => {
     tasksRepo.deleteTask(task.id);
   });
 };
 
-const unassignTasks = async (userId) => {
+const unassignTasks = async (userId: string): Promise<void> => {
   const tasks = await tasksRepo.getAll(userId, 'userId');
   tasks.forEach((task) => {
     tasksRepo.updateTask(task.id, { ...task, userId: null });
   });
 };
 
-const updateTask = async (boardId, taskId, body) => {
+const updateTask = async (
+  boardId: string,
+  taskId: string,
+  body: ITask
+): Promise<ITask> => {
   const newTask = { ...body, id: taskId };
   tasksRepo.updateTask(taskId, newTask);
   return Task.toResponse(newTask);
 };
 
-module.exports = {
+export {
   getAll,
   getTaskById,
   createTask,
