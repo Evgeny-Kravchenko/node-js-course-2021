@@ -1,4 +1,6 @@
-let TASKS = [];
+import { ITask } from './task.model';
+
+let TASKS: ITask[] = [];
 
 /**
  * @namespace TasksRepository
@@ -23,7 +25,10 @@ let TASKS = [];
  * @param {String} parameterToSearch This is a key of a value
  * @returns {Task[]} Array of tasks
  */
-const getAll = async (id, parameterToSearch = 'boardId') => {
+const getAll = async (
+  id: string,
+  parameterToSearch: keyof ITask = 'boardId'
+): Promise<ITask[]> => {
   const tasks = TASKS.filter((item) => item[parameterToSearch] === id);
   return tasks;
 };
@@ -34,7 +39,7 @@ const getAll = async (id, parameterToSearch = 'boardId') => {
  * @param {string} id The id of a task
  * @returns {Task} Got task by id
  */
-const getTaskById = async (id) => {
+const getTaskById = async (id: string): Promise<ITask | undefined> => {
   const task = TASKS.find((item) => item.id === id);
   return task;
 };
@@ -46,7 +51,7 @@ const getTaskById = async (id) => {
  * @returns {Task} Created task
  */
 
-const createTask = async (task) => {
+const createTask = async (task: ITask): Promise<ITask> => {
   TASKS.push(task);
   return task;
 };
@@ -57,7 +62,9 @@ const createTask = async (task) => {
  * @param {string} taskId The id of a task that will be deleted
  */
 
-const deleteTask = async (taskId) => {
+const deleteTask = async (
+  taskId: string | undefined
+): Promise<string | undefined> => {
   TASKS = TASKS.filter((item) => item.id !== taskId);
   return taskId;
 };
@@ -70,7 +77,10 @@ const deleteTask = async (taskId) => {
  * @returns {Task} Updated task
  */
 
-const updateTask = async (taskId, task) => {
+const updateTask = async (
+  taskId: string | undefined,
+  task: ITask
+): Promise<ITask> => {
   TASKS = TASKS.map((item) => {
     if (item.id === taskId) {
       return task;
@@ -80,4 +90,4 @@ const updateTask = async (taskId, task) => {
   return task;
 };
 
-module.exports = { getAll, getTaskById, createTask, deleteTask, updateTask };
+export { getAll, getTaskById, createTask, deleteTask, updateTask };
