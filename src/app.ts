@@ -1,8 +1,13 @@
-import express from 'express';
+import express, { ErrorRequestHandler, Request, Response } from 'express';
 import swaggerUI from 'swagger-ui-express';
 import * as path from 'path';
 import YAML from 'yamljs';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 
+import {
+  validationHandling,
+  notFoundHandling,
+} from './error-handling/error-handling';
 import { reqResLogger } from './middlewares/req-res-logger';
 
 import userRouter from './resources/users/user.router';
@@ -28,5 +33,15 @@ app.use('/', (req, res, next) => {
 app.use('/users', userRouter);
 
 app.use('/boards', boardRouter);
+
+app.use(validationHandling);
+
+app.use(notFoundHandling);
+
+app.use((err: ErrorRequestHandler, req: Request, res: Response) => {
+  res
+    .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    .send(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR));
+});
 
 export default app;

@@ -50,14 +50,19 @@ const createBoard = async (board: IBoard): Promise<IBoard> => {
  * @param {String} board.title A title of a board
  * @param {Array} board.columns Array of column
  */
-const updateBoard = async (boardId: string, board: IBoard): Promise<IBoard> => {
+const updateBoard = async (
+  boardId: string,
+  board: IBoard
+): Promise<IBoard | null> => {
+  let isExist = false;
   BOARDS = BOARDS.map((item) => {
     if (item.id === boardId) {
+      isExist = true;
       return board;
     }
     return item;
   });
-  return board;
+  return isExist ? board : null;
 };
 
 /**
@@ -65,9 +70,15 @@ const updateBoard = async (boardId: string, board: IBoard): Promise<IBoard> => {
  * @memberof BoardRepository
  * @param {String} id A uniq id of a board
  */
-const deleteBoard = async (id: string): Promise<string> => {
-  BOARDS = BOARDS.filter((item) => item.id !== id);
-  return id;
+const deleteBoard = async (id: string): Promise<boolean> => {
+  let isDeleted = false;
+  BOARDS = BOARDS.filter((item) => {
+    if (item.id === id) {
+      isDeleted = true;
+    }
+    return item.id !== id;
+  });
+  return isDeleted;
 };
 
 export {

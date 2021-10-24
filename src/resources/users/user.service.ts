@@ -15,16 +15,16 @@ const createUser = ({ name, login, password }: IUser): IUser => {
   return user;
 };
 
-const updateUser = (userId: string, body: IUser): IUser => {
+const updateUser = (userId: string, body: IUser): Promise<IUser | null> => {
   const newUser = { ...body, id: userId };
-  usersRepo.updateUser(userId, newUser);
-  return newUser;
+  const user = usersRepo.updateUser(userId, newUser);
+  return user;
 };
 
-const deleteUser = (id: string): string => {
+const deleteUser = async (id: string): Promise<boolean> => {
   taskService.unassignTasks(id);
-  usersRepo.deleteUser(id);
-  return id;
+  const isDeleted = await usersRepo.deleteUser(id);
+  return isDeleted;
 };
 
 export { getAll, getUserById, createUser, deleteUser, updateUser };
