@@ -59,15 +59,20 @@ const createUser = async (user: IUser): Promise<IUser> => {
  * @param {CreateUserBody} user Data to update a user
  * @returns {CreateUserBody}
  */
-const updateUser = async (userId: string, user: IUser): Promise<IUser> => {
+const updateUser = async (
+  userId: string,
+  user: IUser
+): Promise<IUser | null> => {
+  let isFound = false;
   const newUsers = USERS.map((item) => {
     if (item.id === userId) {
+      isFound = true;
       return user;
     }
     return item;
   });
   USERS = newUsers;
-  return user;
+  return isFound ? user : null;
 };
 
 /**
@@ -76,9 +81,15 @@ const updateUser = async (userId: string, user: IUser): Promise<IUser> => {
  * @param {string} id The id of a user
  * @returns {string} The id of a user
  */
-const deleteUser = async (id: string): Promise<string> => {
-  USERS = USERS.filter((item) => item.id !== id);
-  return id;
+const deleteUser = async (id: string): Promise<boolean> => {
+  let isDeleted = false;
+  USERS = USERS.filter((item) => {
+    if (item.id === id) {
+      isDeleted = true;
+    }
+    return item.id !== id;
+  });
+  return isDeleted;
 };
 
 export { getAll, getUserById, createUser, deleteUser, updateUser };

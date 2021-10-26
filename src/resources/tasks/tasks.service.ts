@@ -1,8 +1,14 @@
 import * as tasksRepo from './task.memory.repository';
 import { Task, ITask } from './task.model';
+import * as boardsService from '../boards/boards.service';
 
-const getAll = async (boardId: string): Promise<ITask[]> =>
-  tasksRepo.getAll(boardId);
+const getAll = async (boardId: string): Promise<ITask[] | null> => {
+  const boardExist = await boardsService.checkIfBoardExist(boardId);
+  if (!boardExist) {
+    return null;
+  }
+  return tasksRepo.getAll(boardId);
+};
 
 const getTaskById = async (
   boardId: string,

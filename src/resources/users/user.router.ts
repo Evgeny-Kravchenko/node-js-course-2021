@@ -1,6 +1,8 @@
 import { Router } from 'express';
 
-import { StatusCodes, getReasonPhrase } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
+
+import { ValidationError, NotFoundError } from '../../error-handling/errors';
 
 import User from './user.model';
 import * as usersService from './user.service';
@@ -13,72 +15,79 @@ router.route('/').get(async (req, res) => {
   res.json(users.map(User.toResponse));
 });
 
-router.route('/:userId').get(async (req, res) => {
-  const {
-    params: { userId },
-  } = req;
-  if (userId) {
-    const user = await usersService.getUserById(userId);
-    if (user) {
-      res.status(StatusCodes.OK);
-      res.json(User.toResponse(user));
-    } else {
-      res.status(StatusCodes.NOT_FOUND);
-      res.json({ message: getReasonPhrase(StatusCodes.NOT_FOUND) });
+router.route('/:userId').get(async (req, res, next) => {
+  try {
+    const {
+      params: { userId },
+    } = req;
+    if (!userId) {
+      throw new ValidationError();
     }
-  } else {
-    res.status(StatusCodes.BAD_REQUEST);
-    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
+    const user = await usersService.getUserById(userId);
+    if (!user) {
+      throw new NotFoundError();
+    }
+    res.status(StatusCodes.OK);
+    res.json(User.toResponse(user));
+  } catch (err) {
+    next(err);
   }
 });
 
-router.route('/').post(async (req, res) => {
-  const { body } = req;
-  if (!body.name || !body.login || !body.password) {
-    res.status(StatusCodes.BAD_REQUEST);
-    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
-  }
+router.route('/').post(async (req, res, next) => {
   try {
+    const { body } = req;
+    if (!body.name || !body.login || !body.password) {
+      throw new ValidationError();
+    }
+
     const user = await usersService.createUser(body);
     res.status(StatusCodes.CREATED);
     res.json(User.toResponse(user));
   } catch (err) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-    res.json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
+    next(err);
   }
 });
 
-router.route('/:userId').put(async (req, res) => {
+router.route('/:userId').put(async (req, res, next) => {
   const {
     params: { userId },
     body,
   } = req;
-  if (userId && body.name && body.login && body.password) {
-    try {
-      const user = await usersService.updateUser(userId, body);
-      res.status(StatusCodes.OK);
-      res.json(user);
-    } catch (err) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR);
-      res.json({ message: getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR) });
+  try {
+    if (!userId || !body.name || !body.login || !body.password) {
+      throw new ValidationError();
     }
-  } else {
-    res.status(StatusCodes.BAD_REQUEST);
-    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
+
+    const user = await usersService.updateUser(userId, body);
+    if (!user) {
+      throw new NotFoundError();
+    }
+    res.status(StatusCodes.OK);
+    res.json(user);
+  } catch (err) {
+    next(err);
   }
 });
 
-router.route('/:userId').delete(async (req, res) => {
+router.route('/:userId').delete(async (req, res, next) => {
   const {
     params: { userId },
   } = req;
-  if (userId) {
-    await usersService.deleteUser(userId);
+
+  try {
+    if (!userId) {
+      throw new ValidationError();
+    }
+
+    const isDeleted = await usersService.deleteUser(userId);
+    if (!isDeleted) {
+      throw new NotFoundError();
+    }
     res.status(StatusCodes.NO_CONTENT);
     res.json({ userId });
-  } else {
-    res.status(StatusCodes.BAD_REQUEST);
-    res.json({ message: getReasonPhrase(StatusCodes.BAD_REQUEST) });
+  } catch (err) {
+    next(err);
   }
 });
 

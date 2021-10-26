@@ -15,16 +15,19 @@ const createBoard = async ({ title, columns }: IBoard): Promise<IBoard> => {
   return Board.toResponse(board);
 };
 
-const updateBoard = (boardId: string, body: IBoard): IBoard => {
+const updateBoard = async (
+  boardId: string,
+  body: IBoard
+): Promise<IBoard | null> => {
   const newBoard = { ...body, id: boardId };
-  boardsRepo.updateBoard(boardId, newBoard);
-  return Board.toResponse(newBoard);
+  const board = await boardsRepo.updateBoard(boardId, newBoard);
+  return board ? Board.toResponse(newBoard) : null;
 };
 
-const deleteBoard = (id: string): string => {
+const deleteBoard = async (id: string): Promise<boolean> => {
   taskService.deleteTasksByBoardId(id);
-  boardsRepo.deleteBoard(id);
-  return id;
+  const isDeleted = await boardsRepo.deleteBoard(id);
+  return isDeleted;
 };
 
 const checkIfBoardExist = (boardId: string): Promise<boolean> =>
