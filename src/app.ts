@@ -10,6 +10,8 @@ import {
 } from './error-handling/error-handling';
 import { reqResLogger } from './middlewares/req-res-logger';
 
+import logger from './common/logger';
+
 import userRouter from './resources/users/user.router';
 import boardRouter from './resources/boards/board.router';
 
@@ -42,6 +44,19 @@ app.use((err: ErrorRequestHandler, req: Request, res: Response) => {
   res
     .status(StatusCodes.INTERNAL_SERVER_ERROR)
     .send(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR));
+});
+
+process.on('uncaughtException', (error: Error) => {
+  logger.error(
+    `Error name: ${error.name}, error message: ${error.message}, error stack: ${error.stack}`
+  );
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason: Error) => {
+  logger.error(
+    `Error name: ${reason.name}, error message: ${reason.message}, error stack: ${reason.stack}`
+  );
 });
 
 export default app;
