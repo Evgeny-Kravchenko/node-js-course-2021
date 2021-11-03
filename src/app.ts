@@ -1,4 +1,9 @@
-import express, { ErrorRequestHandler, Request, Response } from 'express';
+import express, {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from 'express';
 import swaggerUI from 'swagger-ui-express';
 import * as path from 'path';
 import YAML from 'yamljs';
@@ -26,7 +31,7 @@ app.use(reqResLogger);
 
 app.use('/', (req, res, next) => {
   if (req.originalUrl === '/') {
-    res.send('Service is running!');
+    res.status(200).send('Server is running!');
     return;
   }
   next();
@@ -40,11 +45,19 @@ app.use(validationHandling);
 
 app.use(notFoundHandling);
 
-app.use((err: ErrorRequestHandler, req: Request, res: Response) => {
-  res
-    .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    .send(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR));
-});
+app.use(
+  (
+    err: ErrorRequestHandler,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .send(getReasonPhrase(StatusCodes.INTERNAL_SERVER_ERROR));
+    next(err);
+  }
+);
 
 process.on('uncaughtException', (error: Error) => {
   logger.error(
