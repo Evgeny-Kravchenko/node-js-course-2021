@@ -70,3 +70,17 @@ npm run lint
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+### Run with the help of docker
+
+To run the application in a container you can install the Make package library locally and then run the command:
+
+```
+make run
+```
+
+To stop the container, run the command
+
+```
+make stop
+```

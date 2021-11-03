@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  node:
+    image: 060819962021/node:latest
+    restart: on-failure
+    volumes:
+      - ./src/:/user/app/src
+      - /user/app/node_modules
+    build: .
+    command: npm run start
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - postgres
+    environment:
+      - PORT=4000
+    networks:
+      - net
+  postgres:
+    image: 060819962021/postgres:latest
+    restart: on-failure
+    volumes:
+      - ./db/:/var/lib/postgresql/data
+    build: ./database/
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PG_DATA: /var/lib/postgresql/data
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
