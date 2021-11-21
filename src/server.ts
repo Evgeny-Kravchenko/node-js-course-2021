@@ -1,6 +1,10 @@
 import { PORT } from './common/config';
 import app from './app';
 
-app.listen(PORT, () => {
-  console.log(`App is running on http://localhost:${PORT}`);
+import { TryDBConnect } from './common/db';
+
+TryDBConnect(() => {
+  app.listen(PORT, () => {
+    console.log(`App is running on http://localhost:${PORT}`);
+  });
 });

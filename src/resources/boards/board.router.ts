@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
-import { Board } from './board.model';
+import Board from '../../entities/Board';
 import * as boardsService from './boards.service';
 import taskRouter from '../tasks/task.router';
 
@@ -28,6 +28,7 @@ router.route('/:boardId').get(async (req, res, next) => {
     if (!board) {
       throw new NotFoundError();
     }
+    res.locals.body = board;
     res.status(StatusCodes.OK);
     res.json(board);
   } catch (err) {

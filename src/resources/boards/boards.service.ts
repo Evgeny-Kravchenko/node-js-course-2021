@@ -1,6 +1,6 @@
-import { Board, IBoard } from './board.model';
 import * as boardsRepo from './board.memory.repository';
-import * as taskService from '../tasks/tasks.service';
+import Board from '../../entities/Board';
+import { IBoard } from '../../common/types';
 
 const getAll = (): Promise<IBoard[]> => boardsRepo.getAll();
 
@@ -9,25 +9,19 @@ const getById = async (id: string): Promise<IBoard | undefined> => {
   return board ? Board.toResponse(board) : board;
 };
 
-const createBoard = async ({ title, columns }: IBoard): Promise<IBoard> => {
-  const board = new Board({ title, columns });
-  boardsRepo.createBoard(board);
-  return Board.toResponse(board);
+const createBoard = async (dto: IBoard): Promise<IBoard> => {
+  return boardsRepo.createBoard(dto);
 };
 
 const updateBoard = async (
   boardId: string,
-  body: IBoard
+  dto: IBoard
 ): Promise<IBoard | null> => {
-  const newBoard = { ...body, id: boardId };
-  const board = await boardsRepo.updateBoard(boardId, newBoard);
-  return board ? Board.toResponse(newBoard) : null;
+  return boardsRepo.updateBoard(boardId, dto);
 };
 
 const deleteBoard = async (id: string): Promise<boolean> => {
-  taskService.deleteTasksByBoardId(id);
-  const isDeleted = await boardsRepo.deleteBoard(id);
-  return isDeleted;
+  return boardsRepo.deleteBoard(id);
 };
 
 const checkIfBoardExist = (boardId: string): Promise<boolean> =>

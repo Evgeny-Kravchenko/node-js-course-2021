@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { ValidationError, NotFoundError } from '../../error-handling/errors';
 
-import User from './user.model';
+import User from '../../entities/User';
 import * as usersService from './user.service';
 
 const router = Router();

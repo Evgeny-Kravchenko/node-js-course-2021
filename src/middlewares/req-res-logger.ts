@@ -8,11 +8,13 @@ export const reqResLogger = (
 ): void => {
   res.on('finish', () => {
     logger.info(
-      `url: ${JSON.stringify(
+      `method: ${req.method}; url: ${JSON.stringify(
         req.originalUrl
       )}; query parameters: ${JSON.stringify(
         req.params
-      )}; body: ${JSON.stringify(req.body)}; response status: ${res.statusCode}`
+      )}; params: ${JSON.stringify(req.params)}; body: ${JSON.stringify(
+        req.body
+      )}; response status: ${res.statusCode}`
     );
   });
   next();

@@ -1,6 +1,6 @@
-import { IUser } from './user.model';
-
-let USERS: IUser[] = [];
+import { getRepository } from 'typeorm';
+import { IUser } from '../../common/types';
+import User from '../../entities/User';
 
 /**
  * @namespace UserRepository
@@ -27,7 +27,10 @@ let USERS: IUser[] = [];
  * @memberof UserRepository
  * @returns {User[]} Array of users
  */
-const getAll = async (): Promise<IUser[]> => USERS;
+const getAll = async (): Promise<User[]> => {
+  const userRepo = getRepository(User);
+  return userRepo.find({ where: {} });
+};
 
 /**
  * This function returns a user by id
@@ -36,9 +39,9 @@ const getAll = async (): Promise<IUser[]> => USERS;
  * @returns {User}
  */
 
-const getUserById = async (id: string): Promise<IUser | undefined> => {
-  const user = USERS.find((item) => item.id === id);
-  return user;
+const getUserById = async (id: string): Promise<User | undefined> => {
+  const userRepo = getRepository(User);
+  return userRepo.findOne(id);
 };
 
 /**
@@ -47,9 +50,11 @@ const getUserById = async (id: string): Promise<IUser | undefined> => {
  * @param {CreateUserBody} user
  * @returns {CreateUserBody} User body
  */
-const createUser = async (user: IUser): Promise<IUser> => {
-  USERS.push(user);
-  return user;
+const createUser = async (dto: IUser): Promise<User> => {
+  const userRepo = getRepository(User);
+  const user = await userRepo.create(dto);
+  const savedUser = await userRepo.save(user);
+  return savedUser;
 };
 
 /**
@@ -59,20 +64,10 @@ const createUser = async (user: IUser): Promise<IUser> => {
  * @param {CreateUserBody} user Data to update a user
  * @returns {CreateUserBody}
  */
-const updateUser = async (
-  userId: string,
-  user: IUser
-): Promise<IUser | null> => {
-  let isFound = false;
-  const newUsers = USERS.map((item) => {
-    if (item.id === userId) {
-      isFound = true;
-      return user;
-    }
-    return item;
-  });
-  USERS = newUsers;
-  return isFound ? user : null;
+const updateUser = async (userId: string, dto: IUser): Promise<User | null> => {
+  const userRepo = getRepository(User);
+  const updatedRes = await userRepo.update(userId, dto);
+  return updatedRes.raw;
 };
 
 /**
@@ -82,14 +77,9 @@ const updateUser = async (
  * @returns {string} The id of a user
  */
 const deleteUser = async (id: string): Promise<boolean> => {
-  let isDeleted = false;
-  USERS = USERS.filter((item) => {
-    if (item.id === id) {
-      isDeleted = true;
-    }
-    return item.id !== id;
-  });
-  return isDeleted;
+  const userRepo = getRepository(User);
+  const deletedRes = await userRepo.delete(id);
+  return Boolean(deletedRes.affected);
 };
 
 export { getAll, getUserById, createUser, deleteUser, updateUser };

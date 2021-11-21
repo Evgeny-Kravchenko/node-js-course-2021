@@ -1,29 +1,27 @@
 import * as usersRepo from './user.memory.repository';
-import * as taskService from '../tasks/tasks.service';
-import User, { IUser } from './user.model';
+import User from '../../entities/User';
+import { IUser } from '../../common/types';
+import { unassignTasks } from '../tasks/tasks.service';
 
-const getAll = (): Promise<IUser[]> => usersRepo.getAll();
+const getAll = (): Promise<User[]> => usersRepo.getAll();
 
 const getUserById = async (id: string): Promise<IUser | undefined> => {
   const user = id ? await usersRepo.getUserById(id) : undefined;
   return user;
 };
 
-const createUser = ({ name, login, password }: IUser): IUser => {
-  const user = new User({ name, login, password });
-  usersRepo.createUser(user);
-  return user;
+const createUser = (dto: IUser): Promise<User> => {
+  return usersRepo.createUser(dto);
 };
 
 const updateUser = (userId: string, body: IUser): Promise<IUser | null> => {
-  const newUser = { ...body, id: userId };
-  const user = usersRepo.updateUser(userId, newUser);
+  const user = usersRepo.updateUser(userId, body);
   return user;
 };
 
 const deleteUser = async (id: string): Promise<boolean> => {
-  taskService.unassignTasks(id);
   const isDeleted = await usersRepo.deleteUser(id);
+  await unassignTasks(id);
   return isDeleted;
 };
 
