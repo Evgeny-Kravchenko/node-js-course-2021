@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { ValidationError, NotFoundError } from '../../error-handling/errors';
 
-import { Task } from './task.model';
+import Task from '../../entities/Task';
 import * as tasksService from './tasks.service';
 
 const router = Router({ mergeParams: true });
@@ -34,7 +34,7 @@ router
       params: { boardId, taskId },
     } = req;
     try {
-      if (!taskId) {
+      if (!taskId || !boardId) {
         throw new ValidationError();
       }
 

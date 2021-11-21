@@ -1,6 +1,7 @@
-import { IBoard } from './board.model';
+import { getRepository } from 'typeorm';
 
-let BOARDS: IBoard[] = [];
+import Board from '../../entities/Board';
+import { IBoard } from '../../common/types';
 
 /**
  * @namespace BoardRepository
@@ -10,23 +11,28 @@ let BOARDS: IBoard[] = [];
  * @memberof BoardRepository
  * @returns {Array}
  */
-const getAll = async (): Promise<IBoard[]> => BOARDS;
+const getAll = async (): Promise<Board[]> => {
+  const boardRepo = getRepository(Board);
+  return boardRepo.find({ where: {} });
+};
 
 /**
  * @memberof BoardRepository
  * @param {string} id
  * This function returns a board by id from the repository */
-const getById = async (id: string): Promise<IBoard | undefined> => {
-  const board = BOARDS.find((item) => item.id === id);
-  return board;
+const getById = async (id: string): Promise<Board | undefined> => {
+  const boardRepo = getRepository(Board);
+  return boardRepo.findOne(id);
 };
 
 /**
  * @memberof BoardRepository
  * @param {string} boardId
  * This function check if a board exists in the repository */
-const checkIfBoardExist = async (boardId: string): Promise<boolean> =>
-  BOARDS.some((item) => item.id === boardId);
+const checkIfBoardExist = async (boardId: string): Promise<boolean> => {
+  const board = await getById(boardId);
+  return Boolean(board);
+};
 
 /**
  * The function create a board in the repository
@@ -36,9 +42,11 @@ const checkIfBoardExist = async (boardId: string): Promise<boolean> =>
  * @param {String} board.title A title of a board
  * @param {Array} board.columns Array of column
  *  */
-const createBoard = async (board: IBoard): Promise<IBoard> => {
-  BOARDS.push(board);
-  return board;
+const createBoard = async (dto: IBoard): Promise<Board> => {
+  const boardRepo = getRepository(Board);
+  const board = boardRepo.create(dto);
+  const savedBoard = await boardRepo.save(board);
+  return savedBoard;
 };
 
 /**
@@ -52,17 +60,15 @@ const createBoard = async (board: IBoard): Promise<IBoard> => {
  */
 const updateBoard = async (
   boardId: string,
-  board: IBoard
-): Promise<IBoard | null> => {
-  let isExist = false;
-  BOARDS = BOARDS.map((item) => {
-    if (item.id === boardId) {
-      isExist = true;
-      return board;
-    }
-    return item;
-  });
-  return isExist ? board : null;
+  dto: IBoard
+): Promise<Board | null> => {
+  const boardRepo = getRepository(Board);
+  const doesBoardExist = await checkIfBoardExist(boardId);
+  if (!doesBoardExist) {
+    return null;
+  }
+  const updatedRes = await boardRepo.update(boardId, dto);
+  return updatedRes.raw;
 };
 
 /**
@@ -71,14 +77,9 @@ const updateBoard = async (
  * @param {String} id A uniq id of a board
  */
 const deleteBoard = async (id: string): Promise<boolean> => {
-  let isDeleted = false;
-  BOARDS = BOARDS.filter((item) => {
-    if (item.id === id) {
-      isDeleted = true;
-    }
-    return item.id !== id;
-  });
-  return isDeleted;
+  const boardRepo = getRepository(Board);
+  const deletedRes = await boardRepo.delete(id);
+  return Boolean(deletedRes.affected);
 };
 
 export {

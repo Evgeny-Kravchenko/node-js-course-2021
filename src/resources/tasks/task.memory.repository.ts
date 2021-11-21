@@ -1,6 +1,6 @@
-import { ITask } from './task.model';
-
-let TASKS: ITask[] = [];
+import { getRepository } from 'typeorm';
+import Task from '../../entities/Task';
+import { ITask } from '../../common/types';
 
 /**
  * @namespace TasksRepository
@@ -26,10 +26,13 @@ let TASKS: ITask[] = [];
  * @returns {Task[]} Array of tasks
  */
 const getAll = async (
-  id: string,
+  value: string,
   parameterToSearch: keyof ITask = 'boardId'
-): Promise<ITask[]> => {
-  const tasks = TASKS.filter((item) => item[parameterToSearch] === id);
+): Promise<Task[]> => {
+  const taskRepo = getRepository(Task);
+  const tasks = taskRepo.find({
+    where: { [parameterToSearch]: value },
+  });
   return tasks;
 };
 
@@ -39,9 +42,9 @@ const getAll = async (
  * @param {string} id The id of a task
  * @returns {Task} Got task by id
  */
-const getTaskById = async (id: string): Promise<ITask | undefined> => {
-  const task = TASKS.find((item) => item.id === id);
-  return task;
+const getTaskById = async (id: string): Promise<Task | undefined> => {
+  const taskRepo = getRepository(Task);
+  return taskRepo.findOne(id);
 };
 
 /**
@@ -51,9 +54,11 @@ const getTaskById = async (id: string): Promise<ITask | undefined> => {
  * @returns {Task} Created task
  */
 
-const createTask = async (task: ITask): Promise<ITask> => {
-  TASKS.push(task);
-  return task;
+const createTask = async (dto: ITask): Promise<Task> => {
+  const taskRepo = getRepository(Task);
+  const createdTask = taskRepo.create(dto as Task);
+  const savedTask = await taskRepo.save(createdTask);
+  return savedTask;
 };
 
 /**
@@ -62,11 +67,10 @@ const createTask = async (task: ITask): Promise<ITask> => {
  * @param {string} taskId The id of a task that will be deleted
  */
 
-const deleteTask = async (
-  taskId: string | undefined
-): Promise<string | undefined> => {
-  TASKS = TASKS.filter((item) => item.id !== taskId);
-  return taskId;
+const deleteTask = async (taskId: string): Promise<boolean> => {
+  const taskRepo = getRepository(Task);
+  const deletedRes = await taskRepo.delete(taskId);
+  return Boolean(deletedRes.affected);
 };
 
 /**
@@ -77,17 +81,10 @@ const deleteTask = async (
  * @returns {Task} Updated task
  */
 
-const updateTask = async (
-  taskId: string | undefined,
-  task: ITask
-): Promise<ITask> => {
-  TASKS = TASKS.map((item) => {
-    if (item.id === taskId) {
-      return task;
-    }
-    return item;
-  });
-  return task;
+const updateTask = async (taskId: string, dto: ITask): Promise<Task> => {
+  const taskRepo = getRepository(Task);
+  const updatedRes = await taskRepo.update(taskId, dto as Task);
+  return updatedRes.raw;
 };
 
 export { getAll, getTaskById, createTask, deleteTask, updateTask };

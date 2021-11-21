@@ -3,6 +3,7 @@ import express, {
   NextFunction,
   Request,
   Response,
+  Application,
 } from 'express';
 import swaggerUI from 'swagger-ui-express';
 import * as path from 'path';
@@ -20,7 +21,7 @@ import logger from './common/logger';
 import userRouter from './resources/users/user.router';
 import boardRouter from './resources/boards/board.router';
 
-const app = express();
+const app: Application = express();
 const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
 
 app.use(express.json());
@@ -31,7 +32,7 @@ app.use(reqResLogger);
 
 app.use('/', (req, res, next) => {
   if (req.originalUrl === '/') {
-    res.status(200).send('Server is running!');
+    res.status(StatusCodes.OK).send('Server is running!');
     return;
   }
   next();
